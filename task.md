@@ -13,7 +13,7 @@
     - [x] Ensure .env matches Docker config
     - [x] Run Migrations (`npx prisma migrate dev`)
     - [x] Generate Client (`npx prisma generate`)
-- [ ] Implement Auth Module (JWT)
+- [x] Implement Auth Module (JWT)
 - [ ] Implement Clients CRUD
 - [ ] Implement Projects CRUD
 

@@ -1,29 +1,39 @@
-# Database & ORM Setup Plan
+# Registration Flow Implementation Plan
 
 ## Goal Description
-Initialize the PostgreSQL database using Docker and configure Prisma ORM to connect to it. This involves starting the containers, ensuring the environment variables are correct, and applying the database schema via migrations.
+Allow users to register a new account via the frontend application. This requires a new backend endpoint for registration and a frontend form to collect user details.
 
 ## User Review Required
-> [!IMPORTANT]
-> Ensure Docker Desktop is running on your machine before proceeding.
+> [!NOTE]
+> We will be adding a `POST /auth/register` endpoint.
+> On the frontend, we will create a simple registration page at `/register`.
 
 ## Proposed Changes
 
-### Backend Configuration
-#### [NEW] [server/.env](file:///c:/AntiProject/crmanti/server/.env)
-- Create or update `.env` with the following content to match `docker-compose.yml`:
-  ```env
-  DATABASE_URL="postgresql://myuser:mypassword@localhost:5432/crm_db?schema=public"
-  ```
+### Backend (Server)
+#### [MODIFY] [auth.service.ts](file:///c:/AntiProject/crmanti/server/src/auth/auth.service.ts)
+- Add `register(email, password, name)` method:
+  - Hash the password using `bcrypt`.
+  - Create a new user using `UsersService` (need to add `create` method there too) or directly via Prisma (better to keep it in UsersService).
 
-### Database Initialization
-- Start Docker containers: `docker-compose up -d`
-- Run Prisma migrations: `cd server && npx prisma migrate dev --name init`
-- Generate Prisma Client: `cd server && npx prisma generate`
+#### [MODIFY] [users.service.ts](file:///c:/AntiProject/crmanti/server/src/users/users.service.ts)
+- Add `create(data: Prisma.UserCreateInput)` method.
+
+#### [MODIFY] [auth.controller.ts](file:///c:/AntiProject/crmanti/server/src/auth/auth.controller.ts)
+- Add `@Post('register')` endpoint.
+
+### Frontend (Client)
+#### [NEW] [RegisterPage.tsx](file:///c:/AntiProject/crmanti/client/src/pages/RegisterPage.tsx)
+- Create a form with Email, Password, and Name fields.
+- Use `fetch` to call `POST http://localhost:3000/auth/register`.
+- On success, redirect to Login (or auto-login).
+
+#### [MODIFY] [App.tsx](file:///c:/AntiProject/crmanti/client/src/App.tsx)
+- Add route `/register`.
 
 ## Verification Plan
-
-### Automated Tests
-- **Check Docker Containers**: Run `docker ps` to verify `crm_db` and `crm_pgadmin` are running.
-- **Check Database Connection**: The `npx prisma migrate dev` command will fail if it cannot connect. Success confirms connection.
-- **Prisma Studio**: Run `npx prisma studio` to open a web interface and verify the schema is applied (optional).
+### Manual Verification
+1.  Open `http://localhost:5173/register`.
+2.  Fill in details for "User 1".
+3.  Submit -> Check database (Prisma Studio) to see if user exists.
+4.  Repeat for "User 2".
